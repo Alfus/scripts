@@ -1,0 +1,20 @@
+if [ "$#" -lt 2 ]; then
+  echo "missing params: git split <branch name> <file patterns>"
+  exit 1
+fi
+
+SRC_BRANCH="$(git symbolic-ref HEAD 2>/dev/null)"
+if [ "$SRC_BRANCH" = "" ]; then
+  echo "Could not find current branch"
+  exit 1
+fi
+
+SRC_BRANCH=${SRC_BRANCH##refs/heads/}
+DEST_BRANCH=$1
+shift
+PATTERNS=$@
+echo "splitting with $SRC_BRANCH -> ${USER}/$DEST_BRANCH [$PATTERNS]"
+git new ${DEST_BRANCH}
+git checkout ${SRC_BRANCH} -- ${PATTERNS}
+git checkpoint
+
