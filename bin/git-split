@@ -14,7 +14,7 @@ DEST_BRANCH=$1
 shift
 PATTERNS=$@
 echo "splitting with $SRC_BRANCH -> ${USER}/$DEST_BRANCH [$PATTERNS]"
-git new ${DEST_BRANCH}
+git start ${DEST_BRANCH}
 git checkout ${SRC_BRANCH} -- ${PATTERNS}
 git checkpoint
 
