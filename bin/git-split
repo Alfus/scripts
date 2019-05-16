@@ -3,19 +3,29 @@ if [ "$#" -lt 2 ]; then
   exit 1
 fi
 
-SRC_BRANCH="$(git symbolic-ref HEAD 2>/dev/null)"
+
+SRC_BRANCH=$(git symbolic-ref --short HEAD)
 if [ "$SRC_BRANCH" = "" ]; then
   echo "Could not find current branch"
   exit 1
 fi
 
-SRC_BRANCH=${SRC_BRANCH##refs/heads/}
-DEST_BRANCH=$1
+DEST_BRANCH=${USER}/$1
 shift
 PATTERNS=$@
-echo "splitting with $SRC_BRANCH -> ${USER}/$DEST_BRANCH [$PATTERNS]"
-git checkpoint
-git start ${DEST_BRANCH}
+MERGE_BASE=$(git merge-base origin/develop ${SRC_BRANCH})
+
+echo "splitting at $MERGE_BASE with $SRC_BRANCH -> $DEST_BRANCH [$PATTERNS]"
+
+
+# Save any current work
+git checkpoint 
+# Checkout the merge base.
+git checkout -b $DEST_BRANCH ${MERGE_BASE}
+# Push the new branch.
+git push --set-upstream origin $DEST_BRANCH
+# Checkout the files.
 git checkout ${SRC_BRANCH} -- ${PATTERNS}
+# Commit the files.
 git checkpoint
 
